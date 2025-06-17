@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HomepageContent {
+  id              Int    @id @default(1)
+  welcomeTitle    String
+  welcomeSubtitle String
+  missionTitle    String
+  missionText     String
+  visionTitle     String
+  visionText      String
+  mainImageUrl    String
+  mainImageAlt    String
+  mainImageAiHint String
+
+  @@map("homepage_content")
+}
+
+model Resource {
+  id          String  @id
+  title       String
+  description String
+  category    String
+  subcategory String
+  type        String
+  downloadUrl String
+  isGated     Boolean
+  image       String
+  aiHint      String
+
+  @@map("resources")
+}
+
+model Service {
+  id                       String   @id
+  title                    String
+  industry                 String
+  serviceType              String
+  companySizeCompatibility String[]
+  shortDescription         String
+  longDescription          String
+  features                 String[]
+  image                    String
+  aiHint                   String
+  hasDemo                  Boolean
+
+  @@map("services")
+}
+
+model SuccessStory {
+  id            String       @id
+  clientName    String
+  industry      String
+  challenge     String
+  solution      String
+  pdfUrl        String
+  image         String
+  aiHint        String
+  testimonial   Testimonial? @relation(fields: [testimonialId], references: [id])
+  testimonialId Int?         @unique
+
+  impacts SuccessStoryImpact[]
+
+  technologies String[]
+
+  @@map("success_stories")
+}
+
+model SuccessStoryImpact {
+  id             Int          @id @default(autoincrement())
+  metric         String
+  value          String
+  before         String?
+  after          String?
+  successStory   SuccessStory @relation(fields: [successStoryId], references: [id])
+  successStoryId String
+
+  @@map("success_story_impacts")
+}
+
+model Testimonial {
+  id       Int    @id @default(autoincrement())
+  name     String
+  role     String
+  image    String
+  feedback String
+
+  successStory SuccessStory?
+
+  @@map("testimonials")
+}
+
+model FAQItem {
+  id       Int    @id @default(autoincrement())
+  question String
+  answer   String
+
+  @@map("faq_items")
+}
+
+model PricingPlan {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  price       String
+  iconName    String
+  features    String[]
+  featured    Boolean?
+
+  @@map("pricing_plans")
+}
+
+model ContactInfo {
+  id             Int    @id @default(1)
+  address        String
+  email          String
+  hiringText     String
+  jobOpeningsUrl String
+
+  @@map("contact_info")
+}

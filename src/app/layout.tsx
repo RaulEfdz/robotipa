@@ -1,12 +1,12 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import type { Metadata } from "next";
+import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 
 export const metadata: Metadata = {
-  title: 'Robotipa Centro Web',
-  description: 'Soluciones de IA y Automatización por Robotipa',
+  title: "Robotipa Centro Web",
+  description: "Soluciones de IA y Automatización por Robotipa",
 };
 
 export default function RootLayout({
@@ -18,15 +18,23 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow container mx-auto px-4 py-8">
-          {children}
-        </main>
+        <main className="flex-grow py-8">{children}</main>
         <Footer />
         <Toaster />
       </body>
