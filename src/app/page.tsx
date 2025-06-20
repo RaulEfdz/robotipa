@@ -1,9 +1,7 @@
 import SolutionsShowcase from "@/components/solutions/SolutionsShowcase";
 import SectionWrapper from "@/components/common/SectionWrapper";
-import Image from "next/image";
-import { homepageContent } from "@/lib/data/homepageContent"; // Importar el contenido
+import { homepageContent } from "@/lib/data/homepageContent";
 import HeroSection from "@/components/common/HeroSection";
-
 import PricingSection from "@/components/common/PricingSection";
 import Testimonials from "@/components/common/Testimonials";
 import FAQSection from "@/components/common/FAQSection";

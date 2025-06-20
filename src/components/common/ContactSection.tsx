@@ -1,74 +1,125 @@
 "use client";
 
-import React from "react";
+import React, { useState } from 'react';
+import { z } from 'zod';
+import axios from 'axios';
+import ContactTurnstile from './ContactTurnstile';
+import { contactFormSchema, type ContactFormData } from '@/app/actions';
 
-const ContactSection = () => {
+const API_URL = '/api/contact';
+
+export default function ContactSection() {
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: '',
+    email: '',
+    message: '',
+    phone: '',
+    company: ''
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+    setSubmitError(null);
+
+    try {
+      const result = await contactFormSchema.parse(formData);
+      const response = await axios.post(API_URL, result);
+      
+      if (response.data.success) {
+        setSuccessMessage(true);
+        setFormData({
+          name: '',
+          email: '',
+          message: '',
+          phone: '',
+          company: ''
+        });
+      } else {
+        throw new Error('Failed to submit form');
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors(error.errors.reduce((acc: Record<string, string>, error: z.ZodError['errors'][number]) => ({
+          ...acc,
+          [error.path[0] as string]: error.message
+        }), {}));
+      } else {
+        console.error('Error submitting form:', error);
+        setSubmitError('Error submitting form. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
-    <section>
-      {/* Contact */}
-      <div id="contacto" className="bg-lego-primary">
-        <div className="max-w-5xl px-4 xl:px-0 py-10 lg:py-20 mx-auto">
-          {/* Title */}
-          <div className="max-w-3xl mb-10 lg:mb-14">
-            <h2 className="text-white font-semibold text-2xl md:text-4xl md:leading-tight">
-              Contáctanos
-            </h2>
-            <p className="mt-1 text-lego-accent">
-              Cuéntanos tu objetivo y te ayudamos a lograrlo.
-            </p>
-          </div>
-          {/* End Title */}
-
-          {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 lg:gap-x-16">
-            <div className="md:order-2 border-b border-neutral-800 pb-10 mb-10 md:border-b-0 md:pb-0 md:mb-0">
-              <form>
-                <div className="space-y-4">
-                  {/* Input */}
+    <>
+      <section className="bg-gray-50 py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12">Contáctanos</h2>
+          
+          <div className="max-w-2xl mx-auto">
+            {successMessage ? (
+              <div className="success-message">
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                  <p className="text-center">¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="contact-form">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="relative">
                     <input
                       type="text"
-                      id="hs-tac-input-name"
-                      className="peer p-3 sm:p-4 block w-full bg-lego-secondary/20 border-lego-secondary/50 border rounded-lg sm:text-sm text-white placeholder:text-transparent focus:outline-hidden focus:ring-2 focus:ring-lego-accent focus:border-lego-accent disabled:opacity-50 disabled:pointer-events-none
-              focus:pt-6
-              focus:pb-2
-              not-placeholder-shown:pt-6
-              not-placeholder-shown:pb-2
-              autofill:pt-6
-              autofill:pb-2"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="peer w-full px-3 sm:px-4 pt-6 pb-2 sm:pt-6 sm:pb-2 text-neutral-900 placeholder-neutral-400 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-inset focus:ring-neutral-400 focus:border-neutral-400 focus:outline-none transition-all duration-200 ease-in-out"
                       placeholder="Name"
+                      required
                     />
                     <label
-                      htmlFor="hs-tac-input-name"
-                      className="absolute top-0 start-0 p-3 sm:p-4 h-full text-lego-accent text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
+                      htmlFor="name"
+                      className="absolute top-0 start-0 p-3 sm:p-4 h-full text-neutral-400 text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
                 peer-focus:text-xs
                 peer-focus:-translate-y-1.5
-                peer-focus:text-lego-accent
+                peer-focus:text-neutral-400
                 peer-not-placeholder-shown:text-xs
                 peer-not-placeholder-shown:-translate-y-1.5
-                peer-not-placeholder-shown:text-lego-accent"
+                peer-not-placeholder-shown:text-neutral-400"
                     >
                       Name
                     </label>
                   </div>
-                  {/* End Input */}
 
-                  {/* Input */}
                   <div className="relative">
                     <input
                       type="email"
-                      id="hs-tac-input-email"
-                      className="peer p-3 sm:p-4 block w-full bg-lego-secondary/20 border-lego-secondary/50 border rounded-lg sm:text-sm text-white placeholder:text-transparent focus:outline-hidden focus:ring-2 focus:ring-lego-accent focus:border-lego-accent disabled:opacity-50 disabled:pointer-events-none
-              focus:pt-6
-              focus:pb-2
-              not-placeholder-shown:pt-6
-              not-placeholder-shown:pb-2
-              autofill:pt-6
-              autofill:pb-2"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="peer w-full px-3 sm:px-4 pt-6 pb-2 sm:pt-6 sm:pb-2 text-neutral-900 placeholder-neutral-400 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-inset focus:ring-neutral-400 focus:border-neutral-400 focus:outline-none transition-all duration-200 ease-in-out"
                       placeholder="Email"
+                      required
                     />
                     <label
-                      htmlFor="hs-tac-input-email"
+                      htmlFor="email"
                       className="absolute top-0 start-0 p-3 sm:p-4 h-full text-neutral-400 text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
                 peer-focus:text-xs
                 peer-focus:-translate-y-1.5
@@ -80,24 +131,19 @@ const ContactSection = () => {
                       Email
                     </label>
                   </div>
-                  {/* End Input */}
 
-                  {/* Input */}
                   <div className="relative">
                     <input
                       type="text"
-                      id="hs-tac-input-company"
-                      className="peer p-3 sm:p-4 block w-full bg-lego-secondary/20 border-lego-secondary/50 border rounded-lg sm:text-sm text-white placeholder:text-transparent focus:outline-hidden focus:ring-2 focus:ring-lego-accent focus:border-lego-accent disabled:opacity-50 disabled:pointer-events-none
-              focus:pt-6
-              focus:pb-2
-              not-placeholder-shown:pt-6
-              not-placeholder-shown:pb-2
-              autofill:pt-6
-              autofill:pb-2"
+                      id="company"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleChange}
+                      className="peer w-full px-3 sm:px-4 pt-6 pb-2 sm:pt-6 sm:pb-2 text-neutral-900 placeholder-neutral-400 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-inset focus:ring-neutral-400 focus:border-neutral-400 focus:outline-none transition-all duration-200 ease-in-out"
                       placeholder="Company"
                     />
                     <label
-                      htmlFor="hs-tac-input-company"
+                      htmlFor="company"
                       className="absolute top-0 start-0 p-3 sm:p-4 h-full text-neutral-400 text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
                 peer-focus:text-xs
                 peer-focus:-translate-y-1.5
@@ -109,24 +155,19 @@ const ContactSection = () => {
                       Company
                     </label>
                   </div>
-                  {/* End Input */}
 
-                  {/* Input */}
                   <div className="relative">
                     <input
-                      type="text"
-                      id="hs-tac-input-phone"
-                      className="peer p-3 sm:p-4 block w-full bg-lego-secondary/20 border-lego-secondary/50 border rounded-lg sm:text-sm text-white placeholder:text-transparent focus:outline-hidden focus:ring-2 focus:ring-lego-accent focus:border-lego-accent disabled:opacity-50 disabled:pointer-events-none
-              focus:pt-6
-              focus:pb-2
-              not-placeholder-shown:pt-6
-              not-placeholder-shown:pb-2
-              autofill:pt-6
-              autofill:pb-2"
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="peer w-full px-3 sm:px-4 pt-6 pb-2 sm:pt-6 sm:pb-2 text-neutral-900 placeholder-neutral-400 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-inset focus:ring-neutral-400 focus:border-neutral-400 focus:outline-none transition-all duration-200 ease-in-out"
                       placeholder="Phone"
                     />
                     <label
-                      htmlFor="hs-tac-input-phone"
+                      htmlFor="phone"
                       className="absolute top-0 start-0 p-3 sm:p-4 h-full text-neutral-400 text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
                 peer-focus:text-xs
                 peer-focus:-translate-y-1.5
@@ -138,24 +179,19 @@ const ContactSection = () => {
                       Phone
                     </label>
                   </div>
-                  {/* End Input */}
 
-                  {/* Textarea */}
                   <div className="relative">
                     <textarea
-                      id="hs-tac-message"
-                      className="peer p-3 sm:p-4 block w-full bg-lego-secondary/20 border-lego-secondary/50 border rounded-lg sm:text-sm text-white placeholder:text-transparent focus:outline-hidden focus:ring-2 focus:ring-lego-accent focus:border-lego-accent disabled:opacity-50 disabled:pointer-events-none
-              focus:pt-6
-              focus:pb-2
-              not-placeholder-shown:pt-6
-              not-placeholder-shown:pb-2
-              autofill:pt-6
-              autofill:pb-2"
-                      placeholder="This is a textarea placeholder"
-                      data-hs-textarea-auto-height
-                    ></textarea>
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="peer w-full px-3 sm:px-4 pt-6 pb-2 sm:pt-6 sm:pb-2 text-neutral-900 placeholder-neutral-400 border border-neutral-200 rounded-lg bg-white focus:ring-2 focus:ring-inset focus:ring-neutral-400 focus:border-neutral-400 focus:outline-none transition-all duration-200 ease-in-out"
+                      placeholder="Tell us about your project"
+                      required
+                    />
                     <label
-                      htmlFor="hs-tac-message"
+                      htmlFor="message"
                       className="absolute top-0 start-0 p-3 sm:p-4 h-full text-neutral-400 text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent peer-disabled:opacity-50 peer-disabled:pointer-events-none
                 peer-focus:text-xs
                 peer-focus:-translate-y-1.5
@@ -167,20 +203,20 @@ const ContactSection = () => {
                       Tell us about your project
                     </label>
                   </div>
-                  {/* End Textarea */}
-                </div>
 
-                <div className="mt-2">
-                  <p className="text-xs text-neutral-500">
-                    All fields are required
-                  </p>
+                  <div className="mt-2">
+                    <p className="text-xs text-neutral-500">
+                      All fields are required
+                    </p>
+                  </div>
 
-                  <p className="mt-5">
-                    <a
+                  <div className="flex justify-center">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
                       className="group inline-flex items-center gap-x-2 py-2 px-3 bg-lego-accent font-medium text-sm text-lego-primary rounded-full focus:outline-hidden"
-                      href="#"
                     >
-                      Submit
+                      {isSubmitting ? 'Sending...' : 'Submit'}
                       <svg
                         className="shrink-0 size-4 transition group-hover:translate-x-0.5 group-focus:translate-x-0.5"
                         xmlns="http://www.w3.org/2000/svg"
@@ -196,132 +232,14 @@ const ContactSection = () => {
                         <path d="M5 12h14" />
                         <path d="m12 5 7 7-7 7" />
                       </svg>
-                    </a>
-                  </p>
-                </div>
-              </form>
-            </div>
-            {/* End Col */}
-
-            <div className="space-y-14">
-              {/* Item */}
-              <div className="flex gap-x-5">
-                <svg
-                  className="shrink-0 size-6 text-lego-accent"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <div className="grow">
-                  <h4 className="text-white font-semibold">Our address:</h4>
-
-                  <address className="mt-1 text-lego-accent text-sm not-italic">
-                    300 Bath Street, Tay House
-                    <br />
-                    Glasgow G2 4JR, United Kingdom
-                  </address>
-                </div>
+                    </button>
+                  </div>
+                </form>
               </div>
-              {/* End Item */}
-
-              {/* Item */}
-              <div className="flex gap-x-5">
-                <svg
-                  className="shrink-0 size-6 text-lego-accent"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z" />
-                  <path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10" />
-                </svg>
-                <div className="grow">
-                  <h4 className="text-white font-semibold">Email us:</h4>
-
-                  <a
-                    className="mt-1 text-lego-accent text-sm hover:text-lego-primary focus:outline-hidden focus:text-lego-primary"
-                    href="#mailto:example@site.co"
-                    target="_blank"
-                  >
-                    hello@example.so
-                  </a>
-                </div>
-              </div>
-              {/* End Item */}
-
-              {/* Item */}
-              <div className="flex gap-x-5">
-                <svg
-                  className="shrink-0 size-6 text-lego-accent"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m3 11 18-5v12L3 14v-3z" />
-                  <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
-                </svg>
-                <div className="grow">
-                  <h4 className="text-white font-semibold">We're hiring</h4>
-                  <p className="mt-1 text-lego-accent">
-                    We're thrilled to announce that we're expanding our team and
-                    looking for talented individuals like you to join us.
-                  </p>
-                  <p className="mt-2">
-                    <a
-                      className="group inline-flex items-center gap-x-2 font-medium text-sm text-lego-accent decoration-2 hover:underline focus:outline-hidden focus:underline"
-                      href="#"
-                    >
-                      Job openings
-                      <svg
-                        className="shrink-0 size-4 transition group-hover:translate-x-0.5 group-focus:translate-x-0.5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14" />
-                        <path d="m12 5 7 7-7 7" />
-                      </svg>
-                    </a>
-                  </p>
-                </div>
-              </div>
-              {/* End Item */}
-            </div>
-            {/* End Col */}
+            )}
           </div>
-          {/* End Grid */}
         </div>
-      </div>
-      {/* End Contact */}
-    </section>
+      </section>
+    </>
   );
-};
-
-export default ContactSection;
+}
