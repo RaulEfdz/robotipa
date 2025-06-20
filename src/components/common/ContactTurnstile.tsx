@@ -1,5 +1,5 @@
 import React from 'react';
-import Turnstile from '@marsidev/react-turnstile';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 interface ContactTurnstileProps {
   onVerify: (token: string) => void;
@@ -10,20 +10,7 @@ export default function ContactTurnstile({ onVerify, onError }: ContactTurnstile
   return (
     <div className="flex justify-center items-center">
       <Turnstile
-        sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY || ''}
-        onVerify={onVerify}
-        onError={onError}
-        options={{
-          theme: 'dark',
-          callback: (token) => {
-            console.log('Turnstile verified:', token);
-            onVerify(token);
-          },
-          error: (error) => {
-            console.error('Turnstile error:', error);
-            onError?.(error);
-          },
-        }}
+        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY || ''}
       />
     </div>
   );
