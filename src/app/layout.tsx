@@ -5,8 +5,30 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 
 export const metadata: Metadata = {
-  title: "Robotipa Centro Web",
-  description: "Soluciones de IA y Automatización por Robotipa",
+  metadataBase: new URL("https://robotipa.com"),
+  title: "Robotipa | Soluciones de IA y Automatización",
+  description: "Potenciamos tu negocio con Inteligencia Artificial y soluciones de automatización personalizadas.",
+  openGraph: {
+    title: "Robotipa | Soluciones de IA y Automatización para Empresas",
+    description: "Descubre cómo la IA puede transformar tu negocio y llevarlo al siguiente nivel.",
+    url: "https://robotipa.com",
+    siteName: "Robotipa",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Robotipa | Soluciones de IA y Automatización para Empresas",
+    description: "Descubre cómo la IA puede transformar tu negocio.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
